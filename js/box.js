@@ -6,7 +6,7 @@ function Box(x, y, w, h) {
   this.w = w || 1;
   this.h = h || 1;
 
-  this.fill = '#eee';
+  this.fill = this.toggle_color.colors[0];
 }
 
 
@@ -18,7 +18,8 @@ Box.prototype.toggle_color = function(ctx) {
   this.draw(ctx);
   return this.fill;
 };
-Box.prototype.toggle_color.colors = ["#eee", "#d6e685", "#8cc665", "#44a340", "#1e6823"];
+// Box.prototype.toggle_color.colors = ["#EEEEEE", "#D6E685", "#8CC665", "#44A340", "#1E6823"]; // these are when a box is selected
+Box.prototype.toggle_color.colors = ["#F6F6F6", "#EAF2C1", "#C5E2B1", "#A1D09F", "#8EB390"];
 
 
 Box.prototype.set_color = function(color, ctx) {

@@ -91,7 +91,7 @@ CanvasState.prototype.getBox = function(evt) {
 
 
 CanvasState.prototype.hotkeys = function(event) {
-  if (event.keyCode == 82) { // 'r'
+  if (event.key.toLowerCase() == 'r') {
     this.initialize_boxes();
   }
 };
