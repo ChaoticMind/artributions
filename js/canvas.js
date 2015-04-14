@@ -97,7 +97,10 @@ CanvasState.prototype.getBox = function(evt) {
 
 
 CanvasState.prototype.hotkeys = function(event) {
-  if (event.key.toLowerCase() == 'r') {
+  var key = event.key.toLowerCase();
+  if (key == '?') {
+    $('#help-screen').modal();
+  } else if (key == 'r') {
     this.initialize_boxes();
   }
 };
@@ -157,7 +160,7 @@ CanvasState.prototype.validate_state = function() {
   } else if (low_color == 1 && high_color == Box.colors.length-1) {
     return 1;
   } else if (low_color == high_color && high_color == 1) {
-    return 1
+    return 1;
   } else if (low_color == high_color) {
     return 2;
   } else {

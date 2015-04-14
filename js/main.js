@@ -8,8 +8,8 @@ function initialize() {
   var s = new CanvasState(canvas, valid_div);
 
   document.body.onkeydown = function(event) {
-  	if (document.activeElement == document.body) {
-  		s.hotkeys(event);
-  	}
+    if (document.activeElement == document.body) {
+      s.hotkeys(event);
+    }
   }
 }
