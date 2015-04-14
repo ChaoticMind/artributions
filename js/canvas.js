@@ -35,14 +35,15 @@ function CanvasState(canvas, valid_div) {
     this.boxes[i] = new Array(boxes_rows);
   }
 
-  this.initialize_boxes(); // populate boxes
-
   // valid div
   this.valid_div = valid_div;
-  this.success_string_0 = "This pattern can be generated";
-  this.success_string_1 = "This pattern can be generated, but possibly with a different color";
-  this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color.";
+  this.success_string_0 = "Click on the canvas below";
+  this.success_string_1 = "This pattern can be generated";
+  this.success_string_2 = "This pattern can be generated, but possibly with a different color";
+  this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color";
 
+  // populate boxes
+  this.initialize_boxes();
 
   // event handlers
   var state = this;
@@ -109,6 +110,7 @@ CanvasState.prototype.draw_all = function() {
   for (var i = 0; i < this.boxes.length; i++)
     for (var j = 0; j < this.boxes[i].length; j++)
       this.boxes[i][j].draw(this.ctx);
+  this.update_state();
 };
 
 
@@ -116,13 +118,17 @@ CanvasState.prototype.update_state = function() {
   switch (this.validate_state()) {
     case 0:
       this.valid_div.innerHTML = this.success_string_0;
-      this.valid_div.className = "text-success";
+      this.valid_div.className = "text-info";
       break;
     case 1:
       this.valid_div.innerHTML = this.success_string_1;
-      this.valid_div.className = "text-warning";
+      this.valid_div.className = "text-success";
       break;
     case 2:
+      this.valid_div.innerHTML = this.success_string_2;
+      this.valid_div.className = "text-warning";
+      break;
+    case 3:
       this.valid_div.innerHTML = this.fail_string_0;
       this.valid_div.className = "text-danger";
       break;
@@ -146,14 +152,16 @@ CanvasState.prototype.validate_state = function() {
       }
     }
 
-  if (low_color == 1 && high_color == Box.colors.length-1) {
+  if (low_color === undefined) {
     return 0;
-  } else if (low_color == high_color && high_color == 1) {
-    return 0
-  } else if (low_color == high_color) {
+  } else if (low_color == 1 && high_color == Box.colors.length-1) {
     return 1;
-  } else {
+  } else if (low_color == high_color && high_color == 1) {
+    return 1
+  } else if (low_color == high_color) {
     return 2;
+  } else {
+    return 3;
   }
 };
 
