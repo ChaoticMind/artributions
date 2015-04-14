@@ -22,6 +22,10 @@ Box.prototype.toggle_color = function(ctx) {
 
 
 Box.prototype.set_color_id = function(color_id, ctx) {
+  if (color_id < 0 || color_id > Box.colors.length-1) {
+    console.log('invalid color id at [' + this.x + '][' + this.y + ']');
+    return;
+  }
   this.color_id = color_id;
   this.draw(ctx);
 };

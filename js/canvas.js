@@ -83,6 +83,31 @@ CanvasState.prototype.initialize_boxes = function() {
 };
 
 
+CanvasState.prototype.import_state = function(boxes) {
+  var parsed_boxes = JSON.parse(boxes);
+  if (parsed_boxes.length != this.boxes.length) {
+    console.log('Error: could not import state');
+    return;
+  }
+  for (var i = 0; i < parsed_boxes.length; i++) {
+    if (parsed_boxes[i].length != this.boxes[i].length) {
+      console.log('Error: could not import state at column ' + i);
+      break;
+    }
+    for (var j = 0; j < parsed_boxes[i].length; j++)
+      this.boxes[i][j].set_color_id(parsed_boxes[i][j].color_id, this.ctx);
+  }
+  this.update_state();
+};
+
+
+CanvasState.prototype.export_state = function() {
+  // var json_dump = JSON.stringify(this.boxes, null, '\t');
+  var json_dump = JSON.stringify(this.boxes);
+  console.log(json_dump);
+};
+
+
 CanvasState.prototype.getBox = function(evt) {
   var mouse = this.getMouse(evt);
 
@@ -96,10 +121,14 @@ CanvasState.prototype.getBox = function(evt) {
 };
 
 
-CanvasState.prototype.hotkeys = function(event) {
-  var key = event.key.toLowerCase();
+CanvasState.prototype.hotkeys = function(evt) {
+  var key = evt.key.toLowerCase();
   if (key == '?') {
     $('#help-screen').modal();
+  } else if (key == '1') {
+    this.import_state(preset_1);
+  } else if (key == 'e') {
+    this.export_state();
   } else if (key == 'r') {
     this.initialize_boxes();
   }
@@ -140,6 +169,7 @@ CanvasState.prototype.update_state = function() {
       this.valid_div.className = "text-danger";
   }
 };
+
 
 CanvasState.prototype.validate_state = function() {
   var low_color = undefined;
