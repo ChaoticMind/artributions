@@ -1,8 +1,6 @@
 "use strict";
 function CanvasState(canvas, valid_div) {
   this.canvas = canvas;
-  this.width = canvas.width;
-  this.height = canvas.height;
   this.ctx = canvas.getContext('2d');
 
   // save padding/border info for getMouse()
@@ -18,23 +16,31 @@ function CanvasState(canvas, valid_div) {
   this.htmlLeft = document.body.parentNode.offsetLeft;
 
   // state and options
-  this.boxes = new Array(52);
-  for (var i = 0; i < 52; i++) {
-    this.boxes[i] = new Array(7);
-  }
   this.dragging = false;
   this.next_color_id = 0;
 
+  var boxes_cols = 52;
+  var boxes_rows = 7;
   this.box_width = 12;
   this.box_height = 12;
 
+  this.width = boxes_cols * this.box_width;
+  this.height = boxes_rows * this.box_height;
+  canvas.setAttribute("width", this.width);
+  canvas.setAttribute("height", this.height);
+
+  this.boxes = new Array(boxes_cols);
+  for (var i = 0; i < boxes_cols; i++) {
+    this.boxes[i] = new Array(boxes_rows);
+  }
+
+  this.initialize_boxes(); // populate boxes
+
+  // valid div
   this.valid_div = valid_div;
   this.success_string_0 = "This pattern can be generated";
   this.success_string_1 = "This pattern can be generated, but possibly with a different color";
   this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color.";
-
-  // populate boxes
-  this.initialize_boxes();
 
 
   // event handlers
@@ -59,15 +65,15 @@ function CanvasState(canvas, valid_div) {
 
   canvas.addEventListener('mouseup', function(evt) {
     state.dragging = false;
-    state.next_color_id = null;
+    state.next_color_id = 0;
     state.update_state();
   }, true);
 };
 
 
 CanvasState.prototype.initialize_boxes = function() {
-  for (var i = 0; i < 52; i++)
-    for (var j = 0; j < 7; j++)
+  for (var i = 0; i < this.boxes.length; i++)
+    for (var j = 0; j < this.boxes[i].length; j++)
       this.boxes[i][j] = new Box(i*this.box_width, j*this.box_height, 
                                  this.box_width, this.box_height);
   this.draw_all();
@@ -140,7 +146,7 @@ CanvasState.prototype.validate_state = function() {
 
   if (low_color == 1 && high_color == Box.colors.length-1) {
     return 0;
-  } else if (low_color == (high_color == 1)) {
+  } else if (low_color == high_color && high_color == 1) {
     return 0
   } else if (low_color == high_color) {
     return 1;
