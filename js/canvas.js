@@ -23,7 +23,7 @@ function CanvasState(canvas) {
     this.boxes[i] = new Array(7);
   }
   this.dragging = false;
-  this.next_color = null;
+  this.next_color_id = 0;
 
   this.box_width = 12;
   this.box_height = 12;
@@ -38,7 +38,7 @@ function CanvasState(canvas) {
   canvas.addEventListener('mousedown', function(evt) {
     var box = state.getBox(evt);
     if (box) {
-      state.next_color = box.toggle_color(state.ctx);
+      state.next_color_id = box.toggle_color(state.ctx);
       state.dragging = true;
     }
   }, true);
@@ -47,14 +47,15 @@ function CanvasState(canvas) {
     if (state.dragging){
       var box = state.getBox(evt);
       if (box) {
-        box.set_color(state.next_color, state.ctx);
+        box.set_color_id(state.next_color_id, state.ctx);
       }
     }
   }, true);
 
   canvas.addEventListener('mouseup', function(evt) {
     state.dragging = false;
-    this.next_color = null;
+    state.next_color_id = null;
+    state.validate_state();
   }, true);
 };
 
@@ -97,6 +98,9 @@ CanvasState.prototype.draw_all = function() {
       this.boxes[i][j].draw(this.ctx);
 };
 
+CanvasState.prototype.validate_state = function() {
+  return true;
+};
 
 CanvasState.prototype.getMouse = function(evt) {
   var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
