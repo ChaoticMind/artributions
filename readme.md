@@ -1,0 +1,1 @@
+This is supposed to ultimately create a bash script that would regularily push commits to a github account. The timing of the commits will reproduce the contributions history pattern drawn onto the canvas.

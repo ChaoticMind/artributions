@@ -21,11 +21,12 @@ function CanvasState(canvas, valid_div) {
 
   var boxes_cols = 52;
   var boxes_rows = 7;
-  this.box_width = 12;
-  this.box_height = 12;
+  this.box_width = 11;
+  this.box_height = 11;
+  this.box_margin = 2;
 
-  this.width = boxes_cols * this.box_width;
-  this.height = boxes_rows * this.box_height;
+  this.width = boxes_cols * (this.box_width + this.box_margin);
+  this.height = boxes_rows * (this.box_height + this.box_margin);
   canvas.setAttribute("width", this.width);
   canvas.setAttribute("height", this.height);
 
@@ -74,7 +75,8 @@ function CanvasState(canvas, valid_div) {
 CanvasState.prototype.initialize_boxes = function() {
   for (var i = 0; i < this.boxes.length; i++)
     for (var j = 0; j < this.boxes[i].length; j++)
-      this.boxes[i][j] = new Box(i*this.box_width, j*this.box_height, 
+      this.boxes[i][j] = new Box(i * (this.box_width + this.box_margin),
+                                 j * (this.box_height + this.box_margin),
                                  this.box_width, this.box_height);
   this.draw_all();
 };
@@ -83,8 +85,8 @@ CanvasState.prototype.initialize_boxes = function() {
 CanvasState.prototype.getBox = function(evt) {
   var mouse = this.getMouse(evt);
 
-  var i = parseInt(mouse.x / this.box_width);
-  var j = parseInt(mouse.y / this.box_height);
+  var i = parseInt(mouse.x / (this.box_width + this.box_margin));
+  var j = parseInt(mouse.y / (this.box_height + this.box_margin));
 
   var box_col = this.boxes[i];
   if (box_col) // this is just to mask a console warning if out of bounds on x
