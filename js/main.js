@@ -3,8 +3,9 @@ window.onload = initialize;
 
 
 function initialize() {
-  canvas = document.getElementById('canvas');
-  var s = new CanvasState(canvas);
+  var canvas = document.getElementById('canvas');
+  var valid_div = document.getElementById('valid');
+  var s = new CanvasState(canvas, valid_div);
 
   document.body.onkeydown = function(event) {
   	if (document.activeElement == document.body) {

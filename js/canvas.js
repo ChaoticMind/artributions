@@ -1,5 +1,5 @@
 "use strict";
-function CanvasState(canvas) {
+function CanvasState(canvas, valid_div) {
   this.canvas = canvas;
   this.width = canvas.width;
   this.height = canvas.height;
@@ -28,6 +28,11 @@ function CanvasState(canvas) {
   this.box_width = 12;
   this.box_height = 12;
 
+  this.valid_div = valid_div;
+  this.success_string_0 = "This pattern can be generated";
+  this.success_string_1 = "This pattern can be generated, but possibly with a different color";
+  this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color.";
+
   // populate boxes
   this.initialize_boxes();
 
@@ -55,7 +60,7 @@ function CanvasState(canvas) {
   canvas.addEventListener('mouseup', function(evt) {
     state.dragging = false;
     state.next_color_id = null;
-    state.validate_state();
+    state.update_state();
   }, true);
 };
 
@@ -98,8 +103,50 @@ CanvasState.prototype.draw_all = function() {
       this.boxes[i][j].draw(this.ctx);
 };
 
+
+CanvasState.prototype.update_state = function() {
+  switch (this.validate_state()) {
+    case 0:
+      this.valid_div.innerHTML = this.success_string_0;
+      this.valid_div.className = "text-success";
+      break;
+    case 1:
+      this.valid_div.innerHTML = this.success_string_1;
+      this.valid_div.className = "text-warning";
+      break;
+    case 2:
+      this.valid_div.innerHTML = this.fail_string_0;
+      this.valid_div.className = "text-danger";
+      break;
+    default:
+      this.valid_div.innerHTML = "unknown-state";
+      this.valid_div.className = "text-danger";
+  }
+};
+
 CanvasState.prototype.validate_state = function() {
-  return true;
+  var low_color = undefined;
+  var high_color = 0;
+  for (var i = 0; i < this.boxes.length; i++)
+    for (var j = 0; j < this.boxes[i].length; j++) {
+      var color = this.boxes[i][j].color_id;
+      if (color) {
+        if (low_color === undefined)
+          low_color = color;
+        low_color = Math.min(low_color, color);
+        high_color = Math.max(high_color, color);
+      }
+    }
+
+  if (low_color == 1 && high_color == Box.colors.length-1) {
+    return 0;
+  } else if (low_color == (high_color == 1)) {
+    return 0
+  } else if (low_color == high_color) {
+    return 1;
+  } else {
+    return 2;
+  }
 };
 
 CanvasState.prototype.getMouse = function(evt) {
