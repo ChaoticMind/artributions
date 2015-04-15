@@ -24,6 +24,7 @@ function CanvasState(canvas, valid_div) {
   this.box_width = 11;
   this.box_height = 11;
   this.box_margin = 2;
+  this.colors = ["#F6F6F6", "#EAF2C1", "#C5E2B1", "#A1D09F", "#8EB390"];
 
   this.width = boxes_cols * (this.box_width + this.box_margin);
   this.height = boxes_rows * (this.box_height + this.box_margin);
@@ -49,18 +50,24 @@ function CanvasState(canvas, valid_div) {
   var state = this;
   
   canvas.addEventListener('mousedown', function(evt) {
-    var box = state.getBox(evt);
-    if (box) {
-      state.next_color_id = box.toggle_color(state.ctx);
+    var index = state.getBoxIndex(evt);
+    if (index) {
+      var old_color = state.boxes[index.x][index.y];
+      var new_color = (old_color + 1) % state.colors.length;
+      state.boxes[index.x][index.y] = new_color;
+      state.draw_box(index.x, index.y);
+
+      state.next_color_id = new_color;
       state.dragging = true;
     }
   }, true);
 
   canvas.addEventListener('mousemove', function(evt) {
-    if (state.dragging){
-      var box = state.getBox(evt);
-      if (box) {
-        box.set_color_id(state.next_color_id, state.ctx);
+    if (state.dragging) {
+      var index = state.getBoxIndex(evt);
+      if (index) { // TODO: and changed: much more efficient
+        state.boxes[index.x][index.y] = state.next_color_id;
+        state.draw_box(index.x, index.y);
       }
     }
   }, true);
@@ -75,15 +82,15 @@ function CanvasState(canvas, valid_div) {
 
 CanvasState.prototype.initialize_boxes = function() {
   for (var i = 0; i < this.boxes.length; i++)
-    for (var j = 0; j < this.boxes[i].length; j++)
-      this.boxes[i][j] = new Box(i * (this.box_width + this.box_margin),
-                                 j * (this.box_height + this.box_margin),
-                                 this.box_width, this.box_height);
+    for (var j = 0; j < this.boxes[i].length; j++) {
+      this.boxes[i][j] = 0;
+    }
   this.draw_all();
 };
 
 
 CanvasState.prototype.import_state = function(boxes) {
+  // TODO: recover state if import fails
   var parsed_boxes = JSON.parse(boxes);
   if (parsed_boxes.length != this.boxes.length) {
     console.log('Error: could not import state');
@@ -92,12 +99,19 @@ CanvasState.prototype.import_state = function(boxes) {
   for (var i = 0; i < parsed_boxes.length; i++) {
     if (parsed_boxes[i].length != this.boxes[i].length) {
       console.log('Error: could not import state at column ' + i);
-      break;
+      console.log(parsed_boxes[i].length + ' vs ' + this.boxes[i].length);
+      return;
     }
-    for (var j = 0; j < parsed_boxes[i].length; j++)
-      this.boxes[i][j].set_color_id(parsed_boxes[i][j].color_id, this.ctx);
+    for (var j = 0; j < parsed_boxes[i].length; j++) {
+      var color_id = parsed_boxes[i][j];
+      if (color_id < 0 || color_id > this.colors.length-1) {
+        console.log('invalid color id at [' + i + '][' + j + ']');
+        return;
+      }
+      this.boxes[i][j] = color_id;
+    }
   }
-  this.update_state();
+  this.draw_all();
 };
 
 
@@ -108,16 +122,16 @@ CanvasState.prototype.export_state = function() {
 };
 
 
-CanvasState.prototype.getBox = function(evt) {
+CanvasState.prototype.getBoxIndex = function(evt) {
   var mouse = this.getMouse(evt);
 
   var i = parseInt(mouse.x / (this.box_width + this.box_margin));
   var j = parseInt(mouse.y / (this.box_height + this.box_margin));
 
-  var box_col = this.boxes[i];
-  if (box_col) // this is just to mask a console warning if out of bounds on x
-    return this.boxes[i][j];
-  else return null;
+  if (i >= 0 && i < this.boxes.length && j >= 0 && j < this.boxes[i].length)
+    return {x: i, y: j}
+  else
+    return null;
 };
 
 
@@ -134,14 +148,23 @@ CanvasState.prototype.hotkeys = function(evt) {
   }
 };
 
+CanvasState.prototype.draw_box = function(i, j) {
+  var x = i * (this.box_width + this.box_margin);
+  var y = j * (this.box_height + this.box_margin);
+  this.ctx.clearRect(x, y, this.box_width, this.box_height);
+  this.ctx.fillStyle = this.colors[this.boxes[i][j]];
+  this.ctx.fillRect(x, y, this.box_width, this.box_height);
+}
+
 
 CanvasState.prototype.draw_all = function() {
   this.ctx.clearRect(0, 0, this.width, this.height);
 
   // draw all boxes
   for (var i = 0; i < this.boxes.length; i++)
-    for (var j = 0; j < this.boxes[i].length; j++)
-      this.boxes[i][j].draw(this.ctx);
+    for (var j = 0; j < this.boxes[i].length; j++) {
+      this.draw_box(i, j);
+    }
   this.update_state();
 };
 
@@ -176,8 +199,8 @@ CanvasState.prototype.validate_state = function() {
   var high_color = 0;
   for (var i = 0; i < this.boxes.length; i++)
     for (var j = 0; j < this.boxes[i].length; j++) {
-      var color = this.boxes[i][j].color_id;
-      if (color) {
+      var color = this.boxes[i][j];
+      if (color > 0) {
         if (low_color === undefined)
           low_color = color;
         low_color = Math.min(low_color, color);
@@ -187,7 +210,7 @@ CanvasState.prototype.validate_state = function() {
 
   if (low_color === undefined) {
     return 0;
-  } else if (low_color == 1 && high_color == Box.colors.length-1) {
+  } else if (low_color == 1 && high_color == this.colors.length-1) {
     return 1;
   } else if (low_color == high_color && high_color == 1) {
     return 1;
