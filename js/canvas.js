@@ -93,7 +93,11 @@ CanvasState.prototype.initialize_boxes = function() {
 
 
 CanvasState.prototype.import_state = function(boxes) {
-  // TODO: recover state if import fails
+  var new_boxes = new Array(this.boxes.length);
+  for (var i = 0; i < new_boxes.length; i++) {
+    new_boxes[i] = new Array(this.boxes[i].length);
+  }
+
   var parsed_boxes = JSON.parse(boxes);
   if (parsed_boxes.length != this.boxes.length) {
     console.log('Error: could not import state');
@@ -111,9 +115,10 @@ CanvasState.prototype.import_state = function(boxes) {
         console.log('invalid color id at [' + i + '][' + j + ']');
         return;
       }
-      this.boxes[i][j] = color_id;
+      new_boxes[i][j] = color_id;
     }
   }
+  this.boxes = new_boxes;  // commit on success
   this.draw_all();
 };
 
