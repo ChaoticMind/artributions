@@ -50,6 +50,8 @@ function CanvasState(canvas, valid_div) {
   var state = this;
   
   canvas.addEventListener('mousedown', function(evt) {
+    if (evt.button == 2)
+      return;
     var index = state.getBoxIndex(evt);
     if (index) {
       var old_color = state.boxes[index.x][index.y];
@@ -127,6 +129,7 @@ CanvasState.prototype.export_state = function() {
   // var json_dump = JSON.stringify(this.boxes, null, '\t');
   var json_dump = JSON.stringify(this.boxes);
   console.log(json_dump);
+  // console.log(canvas.toDataURL());
 };
 
 
