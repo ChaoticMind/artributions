@@ -65,9 +65,12 @@ function CanvasState(canvas, valid_div) {
   canvas.addEventListener('mousemove', function(evt) {
     if (state.dragging) {
       var index = state.getBoxIndex(evt);
-      if (index) { // TODO: and changed: much more efficient
-        state.boxes[index.x][index.y] = state.next_color_id;
-        state.draw_box(index.x, index.y);
+      if (index) {
+        var old_color = state.boxes[index.x][index.y];
+        if (old_color != state.next_color_id) {
+          state.boxes[index.x][index.y] = state.next_color_id;
+          state.draw_box(index.x, index.y);
+        }
       }
     }
   }, true);
