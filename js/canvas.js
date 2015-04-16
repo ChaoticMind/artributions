@@ -32,8 +32,10 @@ function CanvasState(canvas, valid_div) {
   canvas.setAttribute("height", this.height);
 
   this.boxes = new Array(boxes_cols);
+  this.saved = new Array(boxes_cols);
   for (var i = 0; i < boxes_cols; i++) {
     this.boxes[i] = new Array(boxes_rows);
+    this.saved[i] = new Array(boxes_rows);
   }
 
   // valid div
@@ -89,6 +91,23 @@ CanvasState.prototype.initialize_boxes = function() {
   for (var i = 0; i < this.boxes.length; i++)
     for (var j = 0; j < this.boxes[i].length; j++) {
       this.boxes[i][j] = 0;
+    }
+  this.draw_all();
+};
+
+
+CanvasState.prototype.save_state = function() {
+  for (var i = 0; i < this.boxes.length; i++)
+    for (var j = 0; j < this.boxes[i].length; j++) {
+      this.saved[i][j] = this.boxes[i][j];
+    }
+};
+
+
+CanvasState.prototype.load_state = function() {
+  for (var i = 0; i < this.boxes.length; i++)
+    for (var j = 0; j < this.boxes[i].length; j++) {
+      this.boxes[i][j] = this.saved[i][j];
     }
   this.draw_all();
 };
@@ -156,8 +175,13 @@ CanvasState.prototype.hotkeys = function(evt) {
     this.export_state();
   } else if (key == 'r') {
     this.initialize_boxes();
+  } else if (key == 's') {
+    this.save_state();
+  } else if (key == 'l') {
+    this.load_state();
   }
 };
+
 
 CanvasState.prototype.draw_box = function(i, j) {
   var x = i * (this.box_width + this.box_margin);
@@ -231,6 +255,7 @@ CanvasState.prototype.validate_state = function() {
     return 3;
   }
 };
+
 
 CanvasState.prototype.getMouse = function(evt) {
   var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
