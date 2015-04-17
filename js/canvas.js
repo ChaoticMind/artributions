@@ -46,7 +46,8 @@ function CanvasState(canvas, valid_div) {
   this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color";
 
   // populate boxes
-  this.initialize_boxes();
+  this.initialize_boxes(this.boxes);
+  this.initialize_boxes(this.saved); // allows swap before save
 
   // event handlers
   var state = this;
@@ -87,10 +88,10 @@ function CanvasState(canvas, valid_div) {
 };
 
 
-CanvasState.prototype.initialize_boxes = function() {
-  for (var i = 0; i < this.boxes.length; i++)
-    for (var j = 0; j < this.boxes[i].length; j++) {
-      this.boxes[i][j] = 0;
+CanvasState.prototype.initialize_boxes = function(arr) {
+  for (var i = 0; i < arr.length; i++)
+    for (var j = 0; j < arr[i].length; j++) {
+      arr[i][j] = 0;
     }
   this.draw_all();
 };
@@ -180,7 +181,7 @@ CanvasState.prototype.hotkeys = function(evt) {
   } else if (key == 'e') {
     this.export_state();
   } else if (key == 'r') {
-    this.initialize_boxes();
+    this.initialize_boxes(this.boxes);
   } else if (key == 's') {
     this.save_state();
   } else if (key == 'l') {
