@@ -18,6 +18,7 @@ function CanvasState(canvas, valid_div) {
   // state and options
   this.dragging = false;
   this.next_color_id = 0;
+  this.border_loops = false;
 
   var boxes_cols = 52;
   var boxes_rows = 7;
@@ -120,25 +121,39 @@ CanvasState.prototype.swap_state = function() {
 };
 
 
+CanvasState.prototype.toggle_border_loop = function() {
+  this.border_loops = !this.border_loops;
+  this.canvas.classList.toggle("border-loops");
+};
+
+
 CanvasState.prototype.shift_left = function() {
   var last_index = this.boxes.length-1;
+  var first_col = this.boxes[0];
   for (var i = 0; i < last_index; i++)
     this.boxes[i] = this.boxes[i+1];
-  this.boxes[last_index] = new Array(this.boxes[last_index].length)
-  for (var j = 0; j < this.boxes[last_index].length; j++) {
-    this.boxes[last_index][j] = 0;
+  if (this.border_loops) {
+    this.boxes[last_index] = first_col;
+  } else {
+    this.boxes[last_index] = new Array(this.boxes[last_index].length)
+    for (var j = 0; j < this.boxes[last_index].length; j++)
+      this.boxes[last_index][j] = 0;
   }
   this.draw_all();
 };
 
 
 CanvasState.prototype.shift_right = function() {
+  var last_col = this.boxes[this.boxes.length-1];
   for (var i = this.boxes.length-1; i > 0; i--) {
     this.boxes[i] = this.boxes[i-1];
   }
-  this.boxes[0] = new Array(this.boxes[0].length)
-  for (var j = 0; j < this.boxes[0].length; j++) {
-    this.boxes[0][j] = 0;
+  if (this.border_loops) {
+    this.boxes[0] = last_col;
+  } else {
+    this.boxes[0] = new Array(this.boxes[0].length)
+    for (var j = 0; j < this.boxes[0].length; j++)
+      this.boxes[0][j] = 0;
   }
   this.draw_all();
 };
@@ -198,6 +213,7 @@ CanvasState.prototype.getBoxIndex = function(evt) {
 
 CanvasState.prototype.hotkeys = function(evt) {
   var key = evt.key.toLowerCase();
+  // console.log(key);
   if (key == '?') {
     $('#help-screen').modal();
   } else if (key == '1') {
@@ -216,6 +232,8 @@ CanvasState.prototype.hotkeys = function(evt) {
     this.shift_left();
   } else if (key == 'k' || key == "arrowright") {
     this.shift_right();
+  } else if (key == '+') {
+    this.toggle_border_loop();
   }
 };
 
