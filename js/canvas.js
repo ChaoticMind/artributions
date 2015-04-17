@@ -120,6 +120,30 @@ CanvasState.prototype.swap_state = function() {
 };
 
 
+CanvasState.prototype.shift_left = function() {
+  var last_index = this.boxes.length-1;
+  for (var i = 0; i < last_index; i++)
+    this.boxes[i] = this.boxes[i+1];
+  this.boxes[last_index] = new Array(this.boxes[last_index].length)
+  for (var j = 0; j < this.boxes[last_index].length; j++) {
+    this.boxes[last_index][j] = 0;
+  }
+  this.draw_all();
+};
+
+
+CanvasState.prototype.shift_right = function() {
+  for (var i = this.boxes.length-1; i > 0; i--) {
+    this.boxes[i] = this.boxes[i-1];
+  }
+  this.boxes[0] = new Array(this.boxes[0].length)
+  for (var j = 0; j < this.boxes[0].length; j++) {
+    this.boxes[0][j] = 0;
+  }
+  this.draw_all();
+};
+
+
 CanvasState.prototype.import_state = function(boxes) {
   var new_boxes = new Array(this.boxes.length);
   for (var i = 0; i < new_boxes.length; i++) {
@@ -188,6 +212,10 @@ CanvasState.prototype.hotkeys = function(evt) {
     this.load_state();
   } else if (key == 'w') {
     this.swap_state();
+  } else if (key == 'j' || key == "arrowleft") {
+    this.shift_left();
+  } else if (key == 'k' || key == "arrowright") {
+    this.shift_right();
   }
 };
 
