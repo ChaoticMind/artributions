@@ -215,7 +215,9 @@ CanvasState.prototype.hotkeys = function(evt) {
   var key = evt.key.toLowerCase();
   // console.log(key);
   if (key == '?') {
-    $('#help-screen').modal();
+    $('#help-screen').modal('toggle');
+  } else if (key == 'escape') {
+    $('#help-screen').modal('hide');
   } else if (key == '1') {
     this.import_state(preset_1);
   } else if (key == 'e') {
