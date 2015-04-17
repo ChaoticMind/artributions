@@ -113,6 +113,12 @@ CanvasState.prototype.load_state = function() {
 };
 
 
+CanvasState.prototype.swap_state = function() {
+  [this.boxes, this.saved] = [this.saved, this.boxes];
+  this.draw_all();
+};
+
+
 CanvasState.prototype.import_state = function(boxes) {
   var new_boxes = new Array(this.boxes.length);
   for (var i = 0; i < new_boxes.length; i++) {
@@ -179,6 +185,8 @@ CanvasState.prototype.hotkeys = function(evt) {
     this.save_state();
   } else if (key == 'l') {
     this.load_state();
+  } else if (key == 'w') {
+    this.swap_state();
   }
 };
 
