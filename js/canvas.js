@@ -18,6 +18,8 @@ function CanvasState(canvas, valid_div) {
   // state and options
   this.dragging = false;
   this.next_color_id = 0;
+  this.edit_row = false;
+  this.edit_col = false;
   this.border_loops = false;
 
   var boxes_cols = 52;
@@ -60,10 +62,8 @@ function CanvasState(canvas, valid_div) {
     if (index) {
       var old_color = state.boxes[index.x][index.y];
       var new_color = (old_color + 1) % state.colors.length;
-      state.boxes[index.x][index.y] = new_color;
-      state.draw_box(index.x, index.y);
 
-      state.next_color_id = new_color;
+      state.next_color_id = state.set_color(index.x, index.y, new_color);
       state.dragging = true;
     }
   }, true);
@@ -71,13 +71,8 @@ function CanvasState(canvas, valid_div) {
   canvas.addEventListener('mousemove', function(evt) {
     if (state.dragging) {
       var index = state.getBoxIndex(evt);
-      if (index) {
-        var old_color = state.boxes[index.x][index.y];
-        if (old_color != state.next_color_id) {
-          state.boxes[index.x][index.y] = state.next_color_id;
-          state.draw_box(index.x, index.y);
-        }
-      }
+      if (index)
+        state.set_color(index.x, index.y, state.next_color_id);
     }
   }, true);
 
@@ -86,6 +81,19 @@ function CanvasState(canvas, valid_div) {
     state.next_color_id = 0;
     state.update_state();
   }, true);
+};
+
+
+CanvasState.prototype.set_color = function(x, y, new_color) {
+  if (this.edit_col)
+    for (var i = 0; i < this.boxes[x].length; i++)
+      this.draw_box(x, i, new_color);
+  else if (this.edit_row)
+    for (var i = 0; i < this.boxes.length; i++)
+      this.draw_box(i, y, new_color);
+  else
+    this.draw_box(x, y, new_color);
+  return new_color;
 };
 
 
@@ -156,6 +164,26 @@ CanvasState.prototype.shift_right = function() {
       this.boxes[0][j] = 0;
   }
   this.draw_all();
+};
+
+
+CanvasState.prototype.toggle_col = function() {
+  if (!this.edit_col) {
+    this.edit_row = false;
+    this.canvas.classList.remove("edit-row");
+  }
+  this.edit_col = !this.edit_col
+  this.canvas.classList.toggle("edit-col");
+};
+
+
+CanvasState.prototype.toggle_row = function() {
+  if (!this.edit_row) {
+    this.edit_col = false;
+    this.canvas.classList.remove("edit-col");
+  }
+  this.edit_row = !this.edit_row
+  this.canvas.classList.toggle("edit-row");
 };
 
 
@@ -234,13 +262,22 @@ CanvasState.prototype.hotkeys = function(evt) {
     this.shift_left();
   } else if (key == 'k' || key == "arrowright") {
     this.shift_right();
+  } else if (key == 'q' || key == "arrowup") {
+    this.toggle_col();
+  } else if (key == 'a' || key == "arrowdown") {
+    this.toggle_row();
   } else if (key == '+') {
     this.toggle_border_loop();
   }
 };
 
 
-CanvasState.prototype.draw_box = function(i, j) {
+CanvasState.prototype.draw_box = function(i, j, new_color) {
+  if (new_color !== undefined)
+    if (this.boxes[i][j] == new_color)
+      return;
+    else
+      this.boxes[i][j] = new_color;
   var x = i * (this.box_width + this.box_margin);
   var y = j * (this.box_height + this.box_margin);
   this.ctx.clearRect(x, y, this.box_width, this.box_height);
