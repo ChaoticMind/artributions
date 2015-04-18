@@ -43,10 +43,12 @@ function CanvasState(canvas, valid_div) {
 
   // valid div
   this.valid_div = valid_div;
+  this.estimated_days = 0;
   this.success_string_0 = "Click on the canvas below";
   this.success_string_1 = "This pattern can be generated";
-  this.success_string_2 = "This pattern can be generated, but possibly with a different color";
-  this.fail_string_0 = "Can't generate pattern. Requires at least one time use of the lowest and highest color";
+  this.success_string_2 = ", but possibly with a different color";
+  this.fail_string_0 = "Can't generate pattern. Requires at least one time " +
+                       "use of the lowest and highest color";
 
   // populate boxes
   this.initialize_boxes(this.boxes);
@@ -305,11 +307,16 @@ CanvasState.prototype.update_state = function() {
       this.valid_div.className = "text-info";
       break;
     case 1:
-      this.valid_div.innerHTML = this.success_string_1;
+      var days = ' (' + this.estimated_days +
+                 (this.estimated_days == 1 ? ' day)' : ' days)');
+      this.valid_div.innerHTML = this.success_string_1 + days;
       this.valid_div.className = "text-success";
       break;
     case 2:
-      this.valid_div.innerHTML = this.success_string_2;
+      var days = ' (' + this.estimated_days +
+                 (this.estimated_days == 1 ? ' day)' : ' days)');
+      this.valid_div.innerHTML =
+        this.success_string_1 + days + this.success_string_2;
       this.valid_div.className = "text-warning";
       break;
     case 3:
@@ -326,12 +333,16 @@ CanvasState.prototype.update_state = function() {
 CanvasState.prototype.validate_state = function() {
   var low_color = undefined;
   var high_color = 0;
+  this.estimated_days = 0;
   for (var i = 0; i < this.boxes.length; i++)
     for (var j = 0; j < this.boxes[i].length; j++) {
       var color = this.boxes[i][j];
       if (color > 0) {
         if (low_color === undefined)
           low_color = color;
+        if (this.estimated_days == 0)
+          this.estimated_days = (this.boxes.length-i-1) * this.boxes[i].length +
+                                this.boxes[i].length - j;
         low_color = Math.min(low_color, color);
         high_color = Math.max(high_color, color);
       }
