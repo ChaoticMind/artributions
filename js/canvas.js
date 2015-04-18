@@ -131,9 +131,17 @@ CanvasState.prototype.swap_state = function() {
 };
 
 
-CanvasState.prototype.toggle_border_loop = function() {
-  this.border_loops = !this.border_loops;
-  this.canvas.classList.toggle("border-loops");
+CanvasState.prototype.toggle_border_loop = function(set) {
+  if (set === undefined) {
+    this.border_loops = !this.border_loops;
+    this.canvas.classList.toggle("border-loops");
+  } else if (set) {
+    this.border_loops = true;
+    this.canvas.classList.add("border-loops");
+  } else {
+    this.border_loops = false;
+    this.canvas.classList.remove("border-loops");
+  }
 };
 
 
@@ -250,6 +258,9 @@ CanvasState.prototype.hotkeys = function(evt) {
     $('#help-screen').modal('hide');
   } else if (key == '1') {
     this.import_state(preset_1);
+  } else if (key == '2') {
+    this.import_state(preset_2);
+    this.toggle_border_loop(true);
   } else if (key == 'e') {
     this.export_state();
   } else if (key == 'r') {
