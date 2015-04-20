@@ -363,7 +363,7 @@ CanvasState.prototype.validate_state = function() {
     return 0;
   } else if (low_color == 1 && high_color == this.colors.length-1) {
     return 1;
-  } else if (low_color == high_color && high_color == 1) {
+  } else if (low_color == high_color && high_color == this.colors.length-1) {
     return 1;
   } else if (low_color == high_color) {
     return 2;
